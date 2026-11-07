@@ -150,6 +150,7 @@ fn visualizer(app: &mut App, ui: &egui::Ui, rect: Rect, now: Option<&NowPlaying>
             };
             app.player_bar_analyser.gain = app.settings.player_bar_gain;
             app.player_bar_analyser.tilt = app.settings.player_bar_tilt;
+            app.player_bar_analyser.bars = app.settings.player_bar_bars as usize;
             let levels = app
                 .player_bar_analyser
                 .step(&samples, std::time::Instant::now());
@@ -157,17 +158,9 @@ fn visualizer(app: &mut App, ui: &egui::Ui, rect: Rect, now: Option<&NowPlaying>
             let peaks = if app.settings.player_bar_peaks {
                 app.player_bar_analyser.peaks()
             } else {
-                [0.0; vis::WIDE_BANDS]
+                vec![0.0; levels.len()]
             };
-            let bars = app.settings.player_bar_bars as usize;
-            spectrum(
-                &painter,
-                rect,
-                &vis::group(&levels, bars),
-                &vis::group(&peaks, bars),
-                &colours,
-                strength,
-            );
+            spectrum(&painter, rect, &levels, &peaks, &colours, strength);
             sounding || !app.player_bar_analyser.settled()
         }
         PlayerBarVis::Waveform => {

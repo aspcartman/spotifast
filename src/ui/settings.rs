@@ -1626,7 +1626,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                         ui,
                         &palette,
                         &mut app.settings.player_bar_bars,
-                        8..=crate::vis::WIDE_BANDS as u32,
+                        8..=crate::vis::WIDE_MAX_BANDS as u32,
                         |slider| slider,
                         |value| value,
                     )

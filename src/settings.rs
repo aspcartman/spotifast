@@ -320,7 +320,7 @@ pub struct Settings {
     /// The small caps the spectrum hangs at each band's recent peak, which
     /// then fall slowly. On by default, as before this setting existed.
     pub player_bar_peaks: bool,
-    /// How many bars the player bar's spectrum draws, up to Winamp's 75.
+    /// How many bars the player bar's spectrum draws, 8 to 256.
     pub player_bar_bars: u32,
     /// The spectrum's sensitivity: band heights are multiplied by this.
     pub player_bar_gain: f32,

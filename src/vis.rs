@@ -589,11 +589,21 @@ pub fn scope_shade(row: u8) -> usize {
     }
 }
 
-/// Samples in one spectrum of the player bar's analyser: Winamp's own.
-pub const WIDE_SAMPLES: usize = FFT_SAMPLES;
-/// The player bar's bands: every one of Winamp's semitone columns as a bar
-/// of its own, where the skin groups them four to a bar.
+/// Samples in one spectrum of the player bar's analyser: four times
+/// Winamp's, so a bin is about 21 Hz and even the lowest bars of a dense
+/// spectrum read a frequency of their own.
+pub const WIDE_SAMPLES: usize = 2048;
+/// The player bar's default bar count: as many as Winamp's columns.
 pub const WIDE_BANDS: usize = COLUMNS;
+/// The most bars the player bar's spectrum draws.
+pub const WIDE_MAX_BANDS: usize = 256;
+/// The frequencies the bars span, log-spaced between these.
+const WIDE_LOW_HZ: f32 = 40.0;
+const WIDE_HIGH_HZ: f32 = 16_000.0;
+/// The level scale: a bar is empty at the floor and full at the top, in
+/// dB below a full-scale sine.
+const WIDE_FLOOR_DB: f32 = -60.0;
+const WIDE_TOP_DB: f32 = -6.0;
 /// How fast a bar falls, in heights per second: Winamp's twelve
 /// sixteenths of a row each sixtieth of a second, over fifteen rows.
 const WIDE_FALL: f32 = FALLOFF / MAX_HEIGHT / 0.016_667;
@@ -602,39 +612,41 @@ const WIDE_FALL: f32 = FALLOFF / MAX_HEIGHT / 0.016_667;
 const PEAK_HOLD: f32 = 0.35;
 const PEAK_GRAVITY: f32 = 2.4;
 
-/// The player bar's spectrum analyser: Winamp's classic analyser, with
-/// each of its seventy-five columns as a bar, heights from 0 to 1 instead
-/// of whole rows, and falls timed by the clock, so they move smoothly at
-/// any frame rate.
+/// The player bar's spectrum analyser: `bars` log-spaced bands from 40 Hz
+/// to 16 kHz, each the loudest bin it covers, on a dB scale so the quieter
+/// highs move as visibly as the bass. Rises at once and falls at Winamp's
+/// rate, timed by the clock so it moves the same at any frame rate.
 pub struct WideAnalyser {
     fft: Fft,
-    wave: [f32; FFT_SAMPLES],
-    spectrum: [f32; SPECTRUM_BINS],
-    levels: [f32; WIDE_BANDS],
+    wave: Vec<f32>,
+    spectrum: Vec<f32>,
+    levels: Vec<f32>,
     /// Each band's peak cap, how long it has hung there, and how fast it
     /// is falling.
-    peaks: [f32; WIDE_BANDS],
-    held: [f32; WIDE_BANDS],
-    speed: [f32; WIDE_BANDS],
+    peaks: Vec<f32>,
+    held: Vec<f32>,
+    speed: Vec<f32>,
     last: Option<Instant>,
-    /// Sensitivity: every band's height times this before it is clipped.
+    /// How many bars to analyse; changing it starts the bars from rest.
+    pub bars: usize,
+    /// Sensitivity: every band's level times this, before the dB scale.
     pub gain: f32,
-    /// Treble boost in dB per octave, rising from the lowest band, so the
-    /// quieter highs move as much as the bass does.
+    /// Treble boost in dB per octave above the lowest band.
     pub tilt: f32,
 }
 
 impl Default for WideAnalyser {
     fn default() -> Self {
         Self {
-            fft: Fft::new(FFT_SAMPLES),
-            wave: [0.0; FFT_SAMPLES],
-            spectrum: [0.0; SPECTRUM_BINS],
-            levels: [0.0; WIDE_BANDS],
-            peaks: [0.0; WIDE_BANDS],
-            held: [0.0; WIDE_BANDS],
-            speed: [0.0; WIDE_BANDS],
+            fft: Fft::new(WIDE_SAMPLES),
+            wave: vec![0.0; WIDE_SAMPLES],
+            spectrum: vec![0.0; WIDE_SAMPLES / 2],
+            levels: Vec::new(),
+            peaks: Vec::new(),
+            held: Vec::new(),
+            speed: Vec::new(),
             last: None,
+            bars: WIDE_BANDS,
             gain: 1.0,
             tilt: 0.0,
         }
@@ -643,9 +655,15 @@ impl Default for WideAnalyser {
 
 impl WideAnalyser {
     /// Moves the bars towards the spectrum of `samples` (mono, -1 to 1,
-    /// `WIDE_SAMPLES` of them): up at once, as Winamp's, and down at its
-    /// rate for the time since the last step.
-    pub fn step(&mut self, samples: &[f32], now: Instant) -> [f32; WIDE_BANDS] {
+    /// `WIDE_SAMPLES` of them): up at once, and down at Winamp's rate for
+    /// the time since the last step.
+    pub fn step(&mut self, samples: &[f32], now: Instant) -> Vec<f32> {
+        let bars = self.bars.clamp(1, WIDE_MAX_BANDS);
+        if self.levels.len() != bars {
+            for values in [&mut self.levels, &mut self.peaks, &mut self.held, &mut self.speed] {
+                *values = vec![0.0; bars];
+            }
+        }
         let elapsed = self
             .last
             .map_or(STEP, |last| now.saturating_duration_since(last))
@@ -654,21 +672,45 @@ impl WideAnalyser {
         self.last = Some(now);
         self.wave.fill(0.0);
         for (slot, sample) in self.wave.iter_mut().zip(samples) {
-            *slot = sample * CHANNEL_SUM;
+            *slot = *sample;
         }
         self.fft.spectrum(&self.wave, &mut self.spectrum);
-        let columns = bands(&self.spectrum);
-        for (band, (level, column)) in self.levels.iter_mut().zip(columns).enumerate() {
-            // Columns are a semitone apart: twelve to the octave.
-            let boost = 10f32.powf(self.tilt * band as f32 / 12.0 / 20.0);
-            let target = (column * self.gain * boost).min(MAX_HEIGHT) / MAX_HEIGHT;
+
+        // A full-scale sine through the Hann window peaks at a quarter of
+        // the window's length, scaled by `Fft::spectrum`.
+        let full_scale = WIDE_SAMPLES as f32 / 4.0 * SPEC_SCALE;
+        let bin_hz = SAMPLE_RATE as f32 / WIDE_SAMPLES as f32;
+        let span = WIDE_HIGH_HZ / WIDE_LOW_HZ;
+        let octaves = span.log2();
+        for band in 0..bars {
+            let low = WIDE_LOW_HZ * span.powf(band as f32 / bars as f32);
+            let high = WIDE_LOW_HZ * span.powf((band + 1) as f32 / bars as f32);
+            // The loudest bin inside the band; a band narrower than a bin
+            // reads the spectrum between its two nearest bins instead.
+            let (first, last) = ((low / bin_hz).ceil() as usize, (high / bin_hz).floor() as usize);
+            let magnitude = if first <= last {
+                self.spectrum[first..=last.min(self.spectrum.len() - 1)]
+                    .iter()
+                    .copied()
+                    .fold(0.0, f32::max)
+            } else {
+                let at = (low * high).sqrt() / bin_hz;
+                let below = at.floor() as usize;
+                let t = at - below as f32;
+                let get = |i: usize| self.spectrum.get(i).copied().unwrap_or(0.0);
+                get(below) * (1.0 - t) + get(below + 1) * t
+            };
+            let boost = self.tilt * octaves * band as f32 / bars as f32;
+            let db = 20.0 * (magnitude / full_scale * self.gain).max(1e-6).log10() + boost;
+            let target = ((db - WIDE_FLOOR_DB) / (WIDE_TOP_DB - WIDE_FLOOR_DB)).clamp(0.0, 1.0);
+            let level = &mut self.levels[band];
             *level = (*level - WIDE_FALL * elapsed).max(target);
             // Too low to see: at rest.
             if *level < 0.01 {
                 *level = 0.0;
             }
         }
-        for band in 0..WIDE_BANDS {
+        for band in 0..bars {
             let level = self.levels[band];
             if level >= self.peaks[band] {
                 self.peaks[band] = level;
@@ -684,12 +726,12 @@ impl WideAnalyser {
                 self.peaks[band] = 0.0;
             }
         }
-        self.levels
+        self.levels.clone()
     }
 
     /// Where each band's peak cap hangs, from 0 to 1.
-    pub fn peaks(&self) -> [f32; WIDE_BANDS] {
-        self.peaks
+    pub fn peaks(&self) -> Vec<f32> {
+        self.peaks.clone()
     }
 
     /// Whether every band and peak has fallen to rest.
@@ -699,19 +741,6 @@ impl WideAnalyser {
             .chain(&self.peaks)
             .all(|level| *level == 0.0)
     }
-}
-
-/// `values` folded into `bars` bars, each the loudest of the bands it
-/// covers, so fewer, wider bars still show every band's punch.
-pub fn group(values: &[f32], bars: usize) -> Vec<f32> {
-    let bars = bars.clamp(1, values.len().max(1));
-    (0..bars)
-        .map(|bar| {
-            let start = bar * values.len() / bars;
-            let end = ((bar + 1) * values.len() / bars).max(start + 1);
-            values[start..end].iter().copied().fold(0.0, f32::max)
-        })
-        .collect()
 }
 
 /// The player bar's waveform: Winamp's scope, every seventh sample with
@@ -1060,7 +1089,7 @@ mod tests {
             let mut analyser = WideAnalyser::default();
             let start = Instant::now();
             analyser.step(&tone, start);
-            let mut levels = [0.0; WIDE_BANDS];
+            let mut levels = Vec::new();
             for frame in 1..=steps {
                 levels = analyser.step(&silence, start + step * frame);
             }
