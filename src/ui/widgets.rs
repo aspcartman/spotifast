@@ -1699,7 +1699,14 @@ fn track_row_contents(
     }
     // Cover.
     if cols.cover > 0.0 {
-        let size = if row.compact { 36.0 } else { 40.0 };
+        // Thin (compact list) rows fit a 28 point cover in their 36.
+        let size = if row.thin {
+            28.0
+        } else if row.compact {
+            36.0
+        } else {
+            40.0
+        };
         let cover_rect = Rect::from_center_size(
             pos2(x + size / 2.0 + 2.0, rect.center().y),
             Vec2::splat(size),

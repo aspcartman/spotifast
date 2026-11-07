@@ -817,7 +817,8 @@ fn table_contents(app: &mut App, ui: &mut egui::Ui, table: Table<'_>) {
         table.items_revision,
     );
     let thin = app.settings.tracklist_compact;
-    let show_cover = !thin && table.show_cover;
+    // Compact rows keep a small cover; only the row height shrinks.
+    let show_cover = table.show_cover;
     // Compact rows show the column too; the row drops its inline artists.
     let show_artist = table
             .items
