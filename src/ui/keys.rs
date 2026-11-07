@@ -898,7 +898,7 @@ mod tests {
                         ui.allocate_space(egui::vec2(400.0, content_height));
                         scroll_page(ui);
                     });
-                    offset = scroll.state.offset.y;
+                    offset = scroll.state.clamped_offset().y;
                     height = scroll.inner_rect.height();
                 },
             );

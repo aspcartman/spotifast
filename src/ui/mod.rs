@@ -384,10 +384,10 @@ fn central(app: &mut App, ui: &mut egui::Ui) {
                     keys::scroll_page(ui);
                 }
             });
-            app.page_scroll = Some((page_key, scroll.state.offset.y));
+            app.page_scroll = Some((page_key, scroll.state.clamped_offset().y));
             ui.ctx()
-                .data_mut(|data| data.insert_temp(scrolled_id, scroll.state.offset.y));
-            header_shadow(ui, scroll.inner_rect, scroll.state.offset.y, palette.dark);
+                .data_mut(|data| data.insert_temp(scrolled_id, scroll.state.clamped_offset().y));
+            header_shadow(ui, scroll.inner_rect, scroll.state.clamped_offset().y, palette.dark);
         });
 }
 

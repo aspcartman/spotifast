@@ -16167,6 +16167,7 @@ mod tests {
                     unit: egui::MouseWheelUnit::Line,
                     delta: egui::vec2(0.0, -3.0),
                     phase: egui::TouchPhase::Move,
+                    source: egui::MouseWheelSource::Unknown,
                     modifiers: egui::Modifiers::SHIFT,
                 });
             }
@@ -16184,7 +16185,7 @@ mod tests {
                     );
                     ui.allocate_space(egui::vec2(100.0, 1200.0));
                 });
-                page_offset = page.state.offset.y;
+                page_offset = page.state.clamped_offset().y;
             });
             output.textures_delta.clear();
             if frame == 0 {

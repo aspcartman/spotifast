@@ -743,7 +743,7 @@ fn transport(app: &mut App, ui: &mut egui::Ui, now: Option<&NowPlaying>, region:
     );
     shuffle_button.widget_info(|| {
         egui::WidgetInfo::selected(
-            egui::WidgetType::Checkbox,
+            egui::WidgetType::CheckBox,
             cell.is_enabled(),
             shuffle,
             gettext(app.locale, "Shuffle"),

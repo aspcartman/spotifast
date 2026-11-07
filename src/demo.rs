@@ -5551,6 +5551,7 @@ mod tests {
                     delta: egui::vec2(0.0, -10_000.0),
                     modifiers: egui::Modifiers::NONE,
                     phase: egui::TouchPhase::Move,
+                    source: egui::MouseWheelSource::Unknown,
                 },
             ],
         );
@@ -8184,6 +8185,7 @@ mod tests {
                         delta: egui::vec2(0.0, -400.0),
                         modifiers: egui::Modifiers::NONE,
                         phase: egui::TouchPhase::Move,
+                        source: egui::MouseWheelSource::Unknown,
                     },
                 ];
                 draw(&mut app, wheel);
@@ -8195,6 +8197,7 @@ mod tests {
                     delta: egui::vec2(0.0, 400.0),
                     modifiers: egui::Modifiers::NONE,
                     phase: egui::TouchPhase::Move,
+                    source: egui::MouseWheelSource::Unknown,
                 }];
                 draw(&mut app, wheel);
                 draw(&mut app, Vec::new());
@@ -12194,7 +12197,7 @@ mod tests {
                             }
                             let shown = scroll
                                 .show(ui, |ui| crate::ui::collection::playlist(app, ui, "pl1"));
-                            result = Some((shown.state.offset.y, shown.inner_rect));
+                            result = Some((shown.state.clamped_offset().y, shown.inner_rect));
                         },
                     );
                     output.textures_delta.clear();
@@ -13486,6 +13489,7 @@ mod tests {
                     unit: egui::MouseWheelUnit::Line,
                     delta: egui::vec2(0.0, -notches),
                     phase: egui::TouchPhase::Move,
+                    source: egui::MouseWheelSource::Unknown,
                     modifiers: egui::Modifiers::NONE,
                 },
             ]
