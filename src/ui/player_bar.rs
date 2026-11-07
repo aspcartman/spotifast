@@ -151,7 +151,12 @@ fn visualizer(app: &mut App, ui: &egui::Ui, rect: Rect, now: Option<&NowPlaying>
             let levels = app
                 .player_bar_analyser
                 .step(&samples, std::time::Instant::now());
-            let peaks = app.player_bar_analyser.peaks();
+            // Zero peaks draw no caps: the spectrum skips caps under 2 points.
+            let peaks = if app.settings.player_bar_peaks {
+                app.player_bar_analyser.peaks()
+            } else {
+                [0.0; vis::WIDE_BANDS]
+            };
             spectrum(&painter, rect, &levels, &peaks, &colours, strength);
             sounding || !app.player_bar_analyser.settled()
         }

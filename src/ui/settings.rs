@@ -1241,6 +1241,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let show_custom_titlebar = cfg!(target_os = "linux") || app.windows_controls_visible();
     let player_bar_vis = gettext(locale, "Player bar visualizer");
     let player_bar_vis_click = gettext(locale, "Click player bar to change visualizer");
+    let player_bar_peaks = gettext(locale, "Spectrum peak caps");
     // Follow system's own light and dark palettes. Omarchy's palette already
     // follows the desktop, so they are offered only without it.
     let show_pair = app.settings.custom_theme.is_none()
@@ -1356,8 +1357,15 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
         ),
         pair_row(fastframe_theme::Base::Light),
         pair_row(fastframe_theme::Base::Dark),
+        RowText::new(
+            player_bar_peaks.clone(),
+            gettext(
+                locale,
+                "Hang a small line at each band's recent peak, which then falls slowly.",
+            ),
+        ),
     ];
-    for index in [8, 9, 10] {
+    for index in [8, 9, 10, 13] {
         appearance_rows[index].available &= visualizers;
     }
     if section_matches(&needle, &appearance, &appearance_rows) {
@@ -1563,6 +1571,25 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                         &palette,
                         &player_bar_vis_click,
                         &mut app.settings.player_bar_vis_click,
+                    )
+                    .changed()
+                    {
+                        changed = true;
+                    }
+                },
+            );
+            filtered_row(
+                ui,
+                &palette,
+                &needle,
+                &appearance,
+                &appearance_rows[13],
+                |ui| {
+                    if widgets::switch(
+                        ui,
+                        &palette,
+                        &player_bar_peaks,
+                        &mut app.settings.player_bar_peaks,
                     )
                     .changed()
                     {
