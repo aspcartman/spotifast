@@ -417,6 +417,12 @@ fn apply_to_style(style: &mut egui::Style, palette: &Palette) {
         active_handle_opacity: 0.55,
         interact_handle_opacity: 0.85,
         foreground_color: true,
+        // Every scroll area that has something to scroll rubber-bands past
+        // its edges and coasts, as AppKit scroll views do (trackpad and drag).
+        kinetic: egui::style::KineticScrollStyle {
+            rubber_band: true,
+            ..Default::default()
+        },
         ..egui::style::ScrollStyle::floating()
     };
     style.interaction.selectable_labels = false;

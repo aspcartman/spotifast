@@ -225,8 +225,7 @@ impl Autoscroll {
                 velocity.y = 0.0;
             }
             let offset = (active.offset + velocity * dt).clamp(Vec2::ZERO, owner.max);
-            let mut state = owner.state;
-            state.offset = offset;
+            let state = with_offset(owner.state, offset);
             match owner.kind {
                 Kind::Ordinary | Kind::Lyrics => state.store(ctx, owner.id),
                 Kind::Playlist { row_points } => {
@@ -272,7 +271,7 @@ impl Autoscroll {
             id: owner.id,
             viewport: frame.root.viewport,
             anchor: position,
-            offset: owner.state.offset,
+            offset: owner.state.clamped_offset(),
             time: owner.input.time,
             velocity: Vec2::ZERO,
             mode: if frame.released() {
@@ -427,8 +426,7 @@ pub fn playlist(ui: &mut Ui, rect: Rect, offset: usize, maximum: usize, row_poin
     }
     let rect = rect.intersect(ui.clip_rect());
     let id = ui.id().with("autoscroll-winamp-playlist");
-    let mut state = egui::scroll_area::State::default();
-    state.offset = egui::vec2(0.0, offset as f32 * row_points);
+    let state = with_offset(egui::scroll_area::State::default(), egui::vec2(0.0, offset as f32 * row_points));
     let area = Area {
         kind: Kind::Playlist { row_points },
         id,
@@ -448,3 +446,14 @@ pub fn playlist(ui: &mut Ui, rect: Rect, offset: usize, maximum: usize, row_poin
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
+
+/// Moves a scroll area's stored offset. egui 0.37 made the offset private,
+/// so it goes through the state's serde form (velocity is not kept, which
+/// autoscroll drives itself anyway).
+fn with_offset(state: egui::scroll_area::State, offset: Vec2) -> egui::scroll_area::State {
+    let Ok(mut value) = serde_json::to_value(state) else {
+        return state;
+    };
+    value["offset"] = serde_json::json!({ "x": offset.x, "y": offset.y });
+    serde_json::from_value(value).unwrap_or(state)
+}

@@ -151,7 +151,12 @@ fn visualizer(app: &mut App, ui: &egui::Ui, rect: Rect, now: Option<&NowPlaying>
             let levels = app
                 .player_bar_analyser
                 .step(&samples, std::time::Instant::now());
-            let peaks = app.player_bar_analyser.peaks();
+            // Zero peaks draw no caps: the spectrum skips caps under 2 points.
+            let peaks = if app.settings.player_bar_peaks {
+                app.player_bar_analyser.peaks()
+            } else {
+                [0.0; vis::WIDE_BANDS]
+            };
             spectrum(&painter, rect, &levels, &peaks, &colours, strength);
             sounding || !app.player_bar_analyser.settled()
         }
@@ -743,7 +748,7 @@ fn transport(app: &mut App, ui: &mut egui::Ui, now: Option<&NowPlaying>, region:
     );
     shuffle_button.widget_info(|| {
         egui::WidgetInfo::selected(
-            egui::WidgetType::Checkbox,
+            egui::WidgetType::CheckBox,
             cell.is_enabled(),
             shuffle,
             gettext(app.locale, "Shuffle"),

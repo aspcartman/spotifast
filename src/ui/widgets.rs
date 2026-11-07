@@ -582,7 +582,7 @@ fn submenu<R>(
 
         let arrow_galley = crate::bidi::layout(
             ui.painter(),
-            egui::menu::SubMenuButton::RIGHT_ARROW,
+            "⏵",
             theme::regular(11.0),
             palette.secondary,
             16.0,
@@ -3251,7 +3251,7 @@ pub fn chip_row(
         })
         .inner;
     let rect = row.inner_rect;
-    let hidden = row.content_size.x - row.state.offset.x - rect.width();
+    let hidden = row.content_size.x - row.state.clamped_offset().x - rect.width();
     if hidden > 0.5 {
         let fade = Rect::from_min_max(pos2(rect.right() - CHIP_FADE, rect.top()), rect.max);
         let mut mesh = egui::Mesh::default();
@@ -3460,7 +3460,7 @@ pub fn switch(ui: &mut Ui, palette: &Palette, label: &str, on: &mut bool) -> egu
             .circle_filled(pos2(knob_x, rect.center().y), 8.0, Color32::WHITE);
     }
     response.widget_info(|| {
-        egui::WidgetInfo::selected(egui::WidgetType::Checkbox, ui.is_enabled(), *on, label)
+        egui::WidgetInfo::selected(egui::WidgetType::CheckBox, ui.is_enabled(), *on, label)
     });
     theme::focus_ring(ui, &response);
     response

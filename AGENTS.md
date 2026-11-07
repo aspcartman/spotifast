@@ -40,14 +40,16 @@ These instructions add implementation constraints for coding agents.
   dependency source into this repository. Never point a dependency at any other
   fork or source (see Pull requests below):
   `.github/scripts/check-dependency-sources.py` fails CI on one.
-- egui and winit come from forks shared with ZapFast, RekordFlash and TonePush
-  (crmne/egui apps-0.36.2, crmne/winit apps-0.30); move all their crates to a
-  new revision together. On Wayland, eframe from that fork paces frames by
-  the compositor's frame callbacks instead of a vsync swap, so a hidden window
-  cannot freeze the app (#266). Do not add a vsync decision of our own.
-- The egui fork shapes right-to-left runs in their own direction but leaves
-  them in logical order. Pass logical text to `crate::bidi`, which reorders
-  the laid-out runs; never reorder the string before layout.
+- egui is stock 0.37 from crates.io; winit still comes from crmne/winit
+  apps-0.30. fastframe comes from aspcartman/fastframe, pinned by rev; move
+  all its crates together.
+- The UI draws with wgpu only; macOS builds carry no OpenGL. MilkDrop
+  (OpenGL, libprojectM) compiles under `cfg(milkdrop)`, which build.rs sets
+  for the `milkdrop` feature off macOS. Gate MilkDrop code with
+  `#[cfg(milkdrop)]`, never `feature = "milkdrop"`.
+- Stock egui has no bidi shaping, so `crate::bidi::reorder` is a no-op: RTL
+  text aligns and wraps from the right but mixed runs stay in logical order.
+  Pass logical text to `crate::bidi`; never reorder the string before layout.
 
 Read `docs/_reference/how-it-connects.md` before changing authentication,
 Spotify requests, Connect, credential storage, or network behaviour. Read

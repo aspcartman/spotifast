@@ -212,19 +212,19 @@ fn draw_view(app: &mut App, runtime: &mut Runtime, ui: &mut Ui, key: u32, primar
 }
 
 /// Where a pane's full screen button was last frame, in this window.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 fn pane_button_id(ctx: &egui::Context) -> Id {
     Id::new(("wmp-pane-button", ctx.viewport_id()))
 }
 
-#[cfg(not(feature = "milkdrop"))]
+#[cfg(not(milkdrop))]
 fn pane_button_id(ctx: &egui::Context) -> Id {
     Id::new(ctx.viewport_id())
 }
 
 // The id is asked for outside the locks: using the context again from inside
 // one freezes the app.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 fn keep_pane_button(ctx: &egui::Context, button: Rect) {
     let id = pane_button_id(ctx);
     ctx.data_mut(|data| data.insert_temp(id, button));
@@ -247,7 +247,7 @@ fn on_our_button(button: Option<Rect>, at: Pos2) -> bool {
 
 /// A pane's way to full screen: a double click on it, or the button that
 /// shows while the pointer is over it.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 fn pane_full_screen(
     app: &mut App,
     ui: &mut Ui,
@@ -477,7 +477,7 @@ fn draw(app: &mut App, ui: &mut Ui, paint: &Paint, origin: Pos2, unit: f32, now:
         }
         Paint::Effects { area, alpha, clip } => {
             let rect = world(*area, origin, unit);
-            #[cfg(feature = "milkdrop")]
+            #[cfg(milkdrop)]
             let waiting = {
                 use crate::milkdrop::pane::{Picture, UV};
                 let picture = if app.settings.vis == VisMode::Off {
@@ -500,7 +500,7 @@ fn draw(app: &mut App, ui: &mut Ui, paint: &Paint, origin: Pos2, unit: f32, now:
                 }
                 picture == Picture::Waiting
             };
-            #[cfg(not(feature = "milkdrop"))]
+            #[cfg(not(milkdrop))]
             let waiting = false;
             let (shapes, moving) = effect_shapes(app, rect, unit, now);
             // Bars have no alpha of their own: past halfway through a fade.
@@ -754,7 +754,7 @@ mod pane_button_tests {
 
     /// A press on the button is ours; anywhere else, and with no button
     /// showing, the skin has it.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_pane_button_is_kept_and_taken_without_freezing_the_context() {
         let ctx = egui::Context::default();

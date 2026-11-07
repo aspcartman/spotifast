@@ -362,7 +362,7 @@ pub(crate) fn run() -> eframe::Result<()> {
     // its own event loop and OpenGL context, reads the sound from a shared
     // buffer, and never touches the app's state. Handle it before anything
     // else, including the argument parser, which does not know its flags.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     if let Some(args) = spotifast::milkdrop::child::Args::parse() {
         std::process::exit(spotifast::milkdrop::child::run(args));
     }
@@ -579,6 +579,7 @@ pub(crate) fn run() -> eframe::Result<()> {
         path,
         due: std::time::Instant::now() + std::time::Duration::from_millis(cli.demo_shot_delay),
         asked: false,
+        image: Default::default(),
     });
     #[cfg(feature = "demo")]
     let demo_drag = cli
@@ -644,26 +645,22 @@ pub(crate) fn run() -> eframe::Result<()> {
         let thumbbar_enabled = desktop_surfaces && options.viewport.taskbar != Some(false);
         #[cfg(target_os = "linux")]
         let hide_from_taskbar = options.viewport.taskbar == Some(false);
-        // Without the wgpu feature OpenGL is the only renderer, so there is
-        // one try and each of these is asked for once. When it cannot draw,
+        // wgpu is the only renderer, so there is one try and each of these
+        // is asked for once. When it cannot draw,
         // fastframe-graphics says why in a native dialog rather than letting
         // the app quit without a word.
         let mut options = Some(options);
         let mut creator: Option<eframe::AppCreator<'_>> = Some(Box::new(move |cc| {
-            if let Some(gl) = &cc.gl {
-                use eframe::glow::HasContext;
-                // eframe has made this window's GL context current
-                // before calling the app creator. These identify the
-                // renderer actually selected, which may differ from
-                // the listed GPU.
-                unsafe {
-                    log::info!(
-                        "OpenGL renderer: {}; vendor: {}; version: {}",
-                        gl.get_parameter_string(eframe::glow::RENDERER),
-                        gl.get_parameter_string(eframe::glow::VENDOR),
-                        gl.get_parameter_string(eframe::glow::VERSION)
-                    );
-                }
+            // Name the adapter wgpu picked, which may differ from the listed GPU.
+            if let Some(render) = &cc.wgpu_render_state {
+                let info = render.adapter.get_info();
+                log::info!(
+                    "wgpu adapter: {}; backend: {:?}; driver: {} {}",
+                    info.name,
+                    info.backend,
+                    info.driver,
+                    info.driver_info
+                );
             }
             let mut app = lease.take(&cc.egui_ctx);
             // Built once per window, before the first frame; the
@@ -1126,8 +1123,10 @@ mod native_window_tests {
     fn windows_wait_for_vsync() {
         assert!(
             native_options(false, None, None, Geometry::default())
-                .glow_options
-                .vsync
+                .wgpu_options
+                .surface
+                .present_mode
+                == eframe::egui_wgpu::wgpu::PresentMode::AutoVsync
         );
         let mini = MiniWindow {
             size: egui::vec2(550.0, 232.0),
@@ -1138,8 +1137,10 @@ mod native_window_tests {
         };
         assert!(
             native_options(false, Some(mini), None, Geometry::default())
-                .glow_options
-                .vsync
+                .wgpu_options
+                .surface
+                .present_mode
+                == eframe::egui_wgpu::wgpu::PresentMode::AutoVsync
         );
     }
 
@@ -1490,6 +1491,8 @@ struct Shot {
     path: std::path::PathBuf,
     due: std::time::Instant,
     asked: bool,
+    /// Where the screenshot callback drops the picture.
+    image: std::sync::Arc<std::sync::Mutex<Option<std::sync::Arc<egui::ColorImage>>>>,
 }
 
 #[cfg(feature = "demo")]
@@ -1504,16 +1507,17 @@ impl Shell {
         ctx.request_repaint();
 
         if !shot.asked && std::time::Instant::now() >= shot.due {
-            ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
+            // egui 0.37 hands the picture to a callback; park it in the shot's slot.
+            let slot = std::sync::Arc::clone(&shot.image);
+            ctx.request_screenshot(move |image| {
+                if let Ok(mut held) = slot.lock() {
+                    *held = Some(image);
+                }
+            });
             shot.asked = true;
         }
 
-        let image = ctx.input(|input| {
-            input.events.iter().find_map(|event| match event {
-                egui::Event::Screenshot { image, .. } => Some(image.clone()),
-                _ => None,
-            })
-        });
+        let image = shot.image.lock().ok().and_then(|mut held| held.take());
         let Some(image) = image else {
             return;
         };
@@ -1583,7 +1587,7 @@ impl eframe::App for Shell {
         }
     }
 
-    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+    fn on_exit(&mut self) {
         let app = &mut *self.app;
         app.save_state();
         app.flush_files();

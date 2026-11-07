@@ -9,7 +9,7 @@ use std::ffi::{CStr, CString, c_char, c_void};
 use std::path::Path;
 use std::sync::Arc;
 
-use eframe::glow::{self, HasContext};
+use glow::{self, HasContext};
 use projectm_sys as pm;
 
 use super::CROSSFADE_SECONDS;

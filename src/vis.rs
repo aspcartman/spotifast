@@ -56,11 +56,11 @@ const SPEC_SCALE: f32 = 0.5;
 pub struct AudioTap {
     samples: Mutex<VecDeque<f32>>,
     /// The ring the MilkDrop child reads, attached while its window is open.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     shm: Mutex<Option<std::sync::Arc<crate::milkdrop::shm::Ring>>>,
     /// The ring of the child drawing for a skin's pane, which can run beside
     /// the window's.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     pane_shm: Mutex<Option<std::sync::Arc<crate::milkdrop::shm::Ring>>>,
 }
 
@@ -74,9 +74,9 @@ impl Default for AudioTap {
     fn default() -> Self {
         Self {
             samples: Mutex::new(VecDeque::with_capacity(KEPT)),
-            #[cfg(feature = "milkdrop")]
+            #[cfg(milkdrop)]
             shm: Mutex::new(None),
-            #[cfg(feature = "milkdrop")]
+            #[cfg(milkdrop)]
             pane_shm: Mutex::new(None),
         }
     }
@@ -88,13 +88,13 @@ impl AudioTap {
     }
 
     /// Connects the tap to MilkDrop's shared-memory ring. `None` detaches it.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     pub fn set_shm(&self, ring: Option<std::sync::Arc<crate::milkdrop::shm::Ring>>) {
         *self.shm.lock().unwrap_or_else(|p| p.into_inner()) = ring;
     }
 
     /// Connects the tap to the pane's ring. `None` detaches it.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     pub fn set_pane_shm(&self, ring: Option<std::sync::Arc<crate::milkdrop::shm::Ring>>) {
         *self.pane_shm.lock().unwrap_or_else(|p| p.into_inner()) = ring;
     }
@@ -105,7 +105,7 @@ impl AudioTap {
         let mut samples = self.samples.lock().unwrap_or_else(|p| p.into_inner());
         record_mono(&mut samples, interleaved, gain);
         drop(samples);
-        #[cfg(feature = "milkdrop")]
+        #[cfg(milkdrop)]
         {
             let rings = [
                 self.shm.lock().unwrap_or_else(|p| p.into_inner()).clone(),
@@ -130,7 +130,7 @@ impl AudioTap {
         }
         // Each lock is kept through the write: a clone of the ring here
         // could turn out to be the last, and free it on this thread.
-        #[cfg(feature = "milkdrop")]
+        #[cfg(milkdrop)]
         for slot in [&self.shm, &self.pane_shm] {
             if let Ok(ring) = slot.try_lock()
                 && let Some(ring) = ring.as_ref()
@@ -185,7 +185,7 @@ fn record_mono(samples: &mut VecDeque<f32>, interleaved: &[f64], gain: f32) {
 
 /// Writes stereo to a shared-memory ring, in pieces of a fixed size on the
 /// stack so that it allocates nothing.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 fn record_stereo(ring: &crate::milkdrop::shm::Ring, interleaved: &[f64], gain: f32) {
     const FRAMES: usize = 256;
     let mut stereo = [0.0f32; FRAMES * 2];

@@ -18,26 +18,27 @@ use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
 /// The MilkDrop child process: its own window, context, and event loop.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub mod child;
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub mod engine;
 /// Finished frames in shared memory, from the child to a skin's pane.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub mod frames;
 /// The app's side of the child process: spawning it and talking to it.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub mod host;
 /// The child's mode with no window, drawing frames for a pane.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 mod offscreen;
 /// Fading text over the picture: the keys, the playing song.
+#[cfg(milkdrop)]
 pub mod overlay;
 /// The app's side of a pane's picture: the stream of frames and its child.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub mod pane;
 /// The shared-memory audio ring between the app and the MilkDrop child.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub mod shm;
 
 /// How long a preset plays before the next fades in.

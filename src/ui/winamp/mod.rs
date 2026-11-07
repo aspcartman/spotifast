@@ -29,7 +29,7 @@ use crate::winamp::{MAX_SCALE, WinampState};
 use super::widgets::{SliderEvent, wheel_notches};
 
 mod equalizer;
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 mod milkdrop;
 mod pixel_text;
 mod playlist;
@@ -48,7 +48,7 @@ const MILKDROP_PANEL_MAX: u32 = 960;
 
 /// The panel's height in the stack, if it is open in this build.
 fn docked_milkdrop(settings: &crate::settings::Settings) -> Option<u32> {
-    (cfg!(feature = "milkdrop") && settings.milkdrop_open)
+    (cfg!(milkdrop) && settings.milkdrop_open)
         .then(|| clamped_panel(settings.milkdrop_panel_height))
 }
 
@@ -432,7 +432,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
                 .clamp(layout::PLAYLIST_MIN_HEIGHT, layout::PLAYLIST_MAX_HEIGHT)
         };
     }
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     if app.milkdrop_framed() {
         let mut below = View {
             ui: view.ui,
@@ -446,7 +446,7 @@ pub fn show(app: &mut App, ui: &mut Ui) {
             crate::theme::visualiser_frame(&ctx, Some(app.milkdrop_pane_fps()));
         }
     }
-    #[cfg(not(feature = "milkdrop"))]
+    #[cfg(not(milkdrop))]
     let _ = below_y;
 
     if vis_moving {
@@ -1752,7 +1752,7 @@ mod tests {
 
     /// MilkDrop docks under everything else, the window grows to fit, and
     /// the double size scales the lot.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_milkdrop_panel_stacks_under_the_rest_and_grows_the_window() {
         let mut settings = crate::settings::Settings {
