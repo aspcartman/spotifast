@@ -28,72 +28,72 @@ log = "0.4"
 # One protected-store API, with only each target's native provider below.
 # Durable Spotify grants must not be copied into ordinary state JSON.
 keyring-core = "1"
-# The whole UI. glow keeps the binary and the dependency tree small; wgpu is
-# not needed for a 2D music client.
+# The whole UI, drawn with wgpu (Metal on macOS, Direct3D 12 on Windows,
+# Vulkan on Linux). No OpenGL in the macOS build.
 # AccessKit connects egui's control names, states, and actions to native screen readers.
-eframe = { version = "0.37.0", default-features = false, features = ["accesskit", "glow", "default_fonts", "links", "wayland", "x11", "persistence"] }
+eframe = { version = "0.37.0", default-features = false, features = ["accesskit", "wgpu", "default_fonts", "links", "wayland", "x11", "persistence"] }
 egui = "0.37.0"
 egui_extras = { version = "0.37.0", features = ["image", "svg"] }
 # The shared foundation of Spotifast, ZapFast, RekordFlash and TonePush
 # (crmne/fastframe). Every crate comes from the same revision; move them
 # together. Dock icons and badges share the same foundation as the tray.
-fastframe-text = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
-fastframe-fonts = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
-fastframe-icons = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
-fastframe-theme = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-text = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-fonts = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-icons = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-theme = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # Colour emoji in the platform's own style (Apple Color Emoji, Segoe UI
 # Emoji, the desktop's colour emoji font), in every text through its egui
 # plugin.
-fastframe-emoji = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-emoji = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # Catalogs compiled from PO files at build time (see build.rs) and the
 # system's preferred languages. No libintl or runtime catalog parsing.
-fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The log file for bug reports and the panic log (env_logger underneath).
-fastframe-log = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-log = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The tray item, so closing the window can keep the music playing:
 # StatusNotifier on Linux, the notification area on Windows, the menu bar
 # on macOS.
-fastframe-tray = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-tray = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # Keeps the app running without a window around eframe::run_native.
-fastframe-shell = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-shell = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # Opens the window, and says in a native dialog why when the computer has no
-# OpenGL 2. Without its wgpu feature: MilkDrop draws in the window with glow.
-fastframe-graphics = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+# usable GPU. aspcartman/fastframe's wgpu branch tries wgpu only.
+fastframe-graphics = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The title bar the app draws itself: the header drag and double-click on
 # every platform, and on Windows and Linux the caption buttons and resizable
 # edges when the listener turns the platform's frame off.
-fastframe-titlebar = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-titlebar = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # Self-update from GitHub releases, on the reqwest client below.
-fastframe-update = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f", features = ["reqwest"] }
+fastframe-update = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c", features = ["reqwest"] }
 # Settings, the session, the history, caches and the credential markers
 # are replaced whole: a temporary file beside each, synced to the disk, then
 # moved over it (written through on Windows), so a crash never leaves half.
-fastframe-file = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-file = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The device's power, session and network state: energy saver, battery,
 # display, lock, the internet's reach and cost, sleep and wake, and the App
 # Nap activity local playback holds on macOS.
-fastframe-power = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-power = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The audio device stream, and the only audio output on every platform: it
 # pauses, so a paused player costs no CPU (#636), follows the default output
 # and reopens after a failure. On Linux it plays through cpal's default host:
 # PipeWire, then PulseAudio, then ALSA. librespot's own backends (rodio,
 # PulseAudio) are left out.
-fastframe-audio = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-audio = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The wheel step, the Linux touchpad scale and glide, and the axis a scroll
 # gesture holds.
-fastframe-scroll = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-scroll = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # Starting at login, with the window or in the tray (#122).
-fastframe-autostart = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-autostart = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # One running copy per user: a lock and a private channel that a second
 # launch and the command line hand their requests to.
-fastframe-instance = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-instance = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The config, state and cache folders: the per-user ones, or for a copy from
 # the portable Windows zip, spotifast-data next to the executable (#703).
-fastframe-dirs = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-dirs = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # The desktop's media controls: MPRIS on Linux, the media overlay on
 # Windows, Now Playing on macOS. The media keys and those panels send
 # commands back, and closing the window keeps the music playing.
-fastframe-now-playing = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-now-playing = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 # Reading installed fonts for MilkDrop's overlays, the Winamp playlist's
 # pixel text, and the playlist face. skrifa is the parser epaint already
 # rasterizes with, and the version has to track epaint's or the binary
@@ -113,17 +113,6 @@ flate2 = "1"
 # text (src/ui/winamp/pixel_text.rs). Already compiled for the SVG icons
 # through egui_extras and resvg, so this adds no code to the build.
 tiny-skia = "0.11"
-# MilkDrop, as libprojectM reimplements it, for the MilkDrop window
-# (src/milkdrop.rs). Built into the binary, so it stays one file.
-projectm-sys = { version = "1.2.2", default-features = false, features = ["static"], optional = true }
-# The MilkDrop window runs as a child process with its own winit event loop
-# and OpenGL context (src/milkdrop/child.rs), because winit allows one event
-# loop per process and eframe owns the app's. These are the same versions
-# eframe already pulls in, so they add no build. Only compiled with the
-# milkdrop feature.
-winit = { version = "0.30", optional = true }
-glutin = { version = "0.32", optional = true }
-glutin-winit = { version = "0.5", optional = true }
 # Detect the live window backend, including when MilkDrop is disabled.
 # eframe already compiles this crate.
 raw-window-handle = "0.6"
@@ -206,9 +195,25 @@ ctr = "0.9"
 # Already in the tree through sysinfo and many others.
 libc = "0.2"
 
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+# MilkDrop, as libprojectM reimplements it, for the MilkDrop window
+# (src/milkdrop.rs). Built into the binary, so it stays one file.
+projectm-sys = { version = "1.2.2", default-features = false, features = ["static"], optional = true }
+# The MilkDrop window runs as a child process with its own winit event loop
+# and OpenGL context (src/milkdrop/child.rs), because winit allows one event
+# loop per process and eframe owns the app's. These are the same versions
+# eframe already pulls in, so they add no build. Only compiled with the
+# milkdrop feature, and never on macOS, whose build carries no OpenGL.
+# glow is the GL binding MilkDrop draws its overlays and copies with; the
+# same version wgpu's GL backend uses on Linux.
+glow = { version = "0.17", optional = true }
+winit = { version = "0.30", optional = true }
+glutin = { version = "0.32", optional = true }
+glutin-winit = { version = "0.5", optional = true }
+
 [target.'cfg(target_os = "macos")'.dependencies]
 # The packaged Dock artwork also identifies unbundled Cargo runs.
-fastframe-dock = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f" }
+fastframe-dock = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
 apple-native-keyring-store = { version = "1.0.2", features = ["keychain"] }
 # The application menus and Dock menu (src/mac_menu.rs). "exception" lets
 # src/mac_touchbar_crash_guard.rs catch a specific AppKit Objective-C
@@ -249,7 +254,7 @@ x11rb = { version = "0.13", default-features = false }
 cc = { version = "1", optional = true }
 # Drops unfinished PO entries and compiles catalog text and gettext plural
 # expressions to Rust. Ordinary builds do not need gettext tools.
-fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "72c461533cb53a3b9ef96346419642594513695f", features = ["build"] }
+fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c", features = ["build"] }
 
 [dev-dependencies]
 # Checks that every catalog covers the template and keeps its placeholders.
@@ -273,8 +278,9 @@ soloist-preview = ["soloist-native-audio"]
 demo = []
 # MilkDrop, through libprojectM: a C++ library that CMake builds into the
 # binary at compile time, so building needs cmake, a C++ compiler, and
-# libclang. `--no-default-features` leaves it out.
-milkdrop = ["dep:projectm-sys", "dep:winit", "dep:glutin", "dep:glutin-winit"]
+# libclang. `--no-default-features` leaves it out. Never built on macOS
+# (build.rs sets `cfg(milkdrop)` only off macOS).
+milkdrop = ["dep:projectm-sys", "dep:winit", "dep:glutin", "dep:glutin-winit", "dep:glow"]
 
 [profile.release]
 lto = "thin"

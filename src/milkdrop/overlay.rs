@@ -8,8 +8,7 @@
 use std::sync::LazyLock;
 use std::time::{Duration, Instant};
 
-use eframe::glow;
-use eframe::glow::HasContext as _;
+use glow::HasContext as _;
 use skrifa::MetadataProvider as _;
 use skrifa::instance::{LocationRef, Size};
 use skrifa::outline::{DrawSettings, OutlinePen};

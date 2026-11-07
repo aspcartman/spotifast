@@ -323,7 +323,7 @@ pub fn fullscreen(app: &mut App, ui: &mut egui::Ui) {
             // The empty space is the backdrop's switch, as the player bar's
             // is its visualizer's. Everything drawn after this takes its own
             // clicks, and a drag is no click.
-            #[cfg(feature = "milkdrop")]
+            #[cfg(milkdrop)]
             if ui
                 .interact(rect, ui.id().with("lyrics-backdrop"), Sense::click())
                 .clicked()
@@ -585,7 +585,7 @@ fn backdrop_dim(glow: f32) -> f32 {
 
 /// MilkDrop filling `rect`, dimmed so the words stay clear whatever it draws.
 /// `false` leaves the art: there is no picture yet, or none to be had.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 fn milkdrop_backdrop(app: &mut App, ui: &mut egui::Ui, rect: Rect) -> bool {
     use crate::milkdrop::pane::{Picture, UV};
     if !app.milkdrop_behind_lyrics() {
@@ -622,7 +622,7 @@ fn milkdrop_backdrop(app: &mut App, ui: &mut egui::Ui, rect: Rect) -> bool {
 /// MilkDrop alone, edge to edge and at full brightness, under the root of the
 /// window so that the player bar comes and goes over it without resizing it.
 /// Returns whether the controls show.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub fn immersive(app: &mut App, ui: &mut egui::Ui) -> bool {
     use crate::milkdrop::pane::{Picture, UV};
     let ctx = ui.ctx().clone();
@@ -651,7 +651,7 @@ pub fn immersive(app: &mut App, ui: &mut egui::Ui) -> bool {
 
 /// Everything in immersive mode that is not a control: any click there brings
 /// the view back.
-#[cfg(feature = "milkdrop")]
+#[cfg(milkdrop)]
 pub fn immersive_click(app: &mut App, ui: &mut egui::Ui) {
     egui::CentralPanel::default()
         .frame(Frame::new())
@@ -668,7 +668,7 @@ pub fn immersive_click(app: &mut App, ui: &mut egui::Ui) {
 
 /// The cover is the way into immersive mode, if there is MilkDrop to go to.
 fn cover_opens_immersive(app: &mut App, ui: &egui::Ui, cover: Rect, art: bool) {
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     if art
         && ui
             .interact(cover, ui.id().with("lyrics-cover"), Sense::click())
@@ -677,13 +677,13 @@ fn cover_opens_immersive(app: &mut App, ui: &egui::Ui, cover: Rect, art: bool) {
     {
         app.actions.push(Action::EnterImmersive);
     }
-    #[cfg(not(feature = "milkdrop"))]
+    #[cfg(not(milkdrop))]
     let _ = (app, ui, cover, art);
 }
 
 fn background(app: &mut App, ui: &mut egui::Ui, rect: Rect) {
     theme::apply_local(ui, &theme::Palette::dark());
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     if milkdrop_backdrop(app, ui, rect) {
         return;
     }

@@ -722,10 +722,10 @@ pub struct App {
     pub milkdrop_pos: Option<[f32; 2]>,
     /// The MilkDrop child process; `None` until it is first opened. Its
     /// `Drop` stops the child when the app does.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     milkdrop_host: Option<crate::milkdrop::host::Host>,
     /// MilkDrop's frames for a skin's pane; `None` until one first shows.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     milkdrop_pane: Option<crate::milkdrop::pane::Stream>,
     /// What fills full screen lyrics: MilkDrop rather than the cover's art.
     /// Follows `settings.lyrics_milkdrop`, or is on for a trip from a skin.
@@ -1417,9 +1417,9 @@ impl App {
             session_lyrics_fullscreen_from: session.lyrics_fullscreen_from,
             dialog_rect: None,
             milkdrop_pos: session.milkdrop_pos,
-            #[cfg(feature = "milkdrop")]
+            #[cfg(milkdrop)]
             milkdrop_host: None,
-            #[cfg(feature = "milkdrop")]
+            #[cfg(milkdrop)]
             milkdrop_pane: None,
             milkdrop_backdrop,
             skin_return: false,
@@ -1618,7 +1618,7 @@ impl App {
     /// The textures of the skin and its pane belong to the last window.
     fn forget_skin_textures(&mut self) {
         self.winamp.forget_textures();
-        #[cfg(feature = "milkdrop")]
+        #[cfg(milkdrop)]
         if let Some(stream) = &mut self.milkdrop_pane {
             stream.forget_texture();
         }
@@ -4744,7 +4744,7 @@ impl App {
                         .replace("{count}", &count.to_string()),
                     );
                     // Restart the child so it loads the new preset list.
-                    #[cfg(feature = "milkdrop")]
+                    #[cfg(milkdrop)]
                     if let Some(host) = self.milkdrop_host.as_mut()
                         && host.is_running()
                     {
@@ -4761,7 +4761,7 @@ impl App {
     }
 
     /// Syncs MilkDrop settings and receives window state and commands.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn sync_milkdrop(&mut self, ctx: &egui::Context) {
         let presets = self.dirs.milkdrop_dir();
         let open = self.plain_milkdrop_wanted();
@@ -4839,7 +4839,7 @@ impl App {
     /// A first use has nothing to draw but the idle preset, which hardly
     /// answers the music; the packs are fetched in the background and the
     /// picture fills up on its own.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn fetch_presets_if_none(&mut self, ctx: &egui::Context) {
         let folder = self.dirs.milkdrop_dir();
         if self.winamp.presets.downloading().is_none() && !crate::milkdrop::has_presets(&folder) {
@@ -4899,7 +4899,7 @@ impl App {
 
     /// MilkDrop's picture for a pane this many physical pixels big. Called
     /// from drawing; see `milkdrop::pane::Stream::show`.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     pub fn milkdrop_picture(
         &mut self,
         ctx: &egui::Context,
@@ -4918,7 +4918,7 @@ impl App {
     }
 
     /// Has the picture answer `picture`, whatever a child would.
-    #[cfg(all(test, feature = "milkdrop"))]
+    #[cfg(all(test, milkdrop))]
     pub fn answer_milkdrop(&mut self, picture: crate::milkdrop::pane::Picture) {
         let tap = &self.winamp.tap;
         self.milkdrop_pane
@@ -4927,7 +4927,7 @@ impl App {
     }
 
     /// How bright MilkDrop's picture is, from 0 to 1.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     pub fn milkdrop_glow(&self) -> f32 {
         self.milkdrop_pane
             .as_ref()
@@ -4935,7 +4935,7 @@ impl App {
     }
 
     /// Starts and stops the pane's child, and hands it the settings.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn sync_milkdrop_pane(&mut self) {
         let fps = self.milkdrop_pane_fps();
         let seconds = self.settings.milkdrop_seconds;
@@ -4957,7 +4957,7 @@ impl App {
     /// processes: the visualizers' rate for a skin's pane, which is one of
     /// them, and MilkDrop's own for its window, which has its own focus. It
     /// stops by itself once nobody can see the pane.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     pub fn milkdrop_pane_fps(&self) -> u32 {
         let rate = if self.milkdrop_framed() || self.milkdrop_behind_lyrics() {
             Some(crate::power::milkdrop_fps(
@@ -4997,7 +4997,7 @@ impl App {
     /// Records the MilkDrop screen refresh rate and uses it as the initial FPS.
     /// Later screen changes do not override a configured FPS, and an answer
     /// that is no rate, such as Windows's "hardware default", is ignored.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn learn_screen_hz(&mut self, hz: u32) {
         if !crate::milkdrop::is_screen_rate(hz) || self.settings.milkdrop_screen_hz == hz {
             return;
@@ -5012,7 +5012,7 @@ impl App {
     }
 
     /// Applies playback commands received from the MilkDrop window.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn milkdrop_command(&mut self, command: &str) {
         match command {
             "previous" => self.actions.push(Action::Previous),
@@ -5292,7 +5292,7 @@ impl App {
             }
             Command::Effect(by) => {
                 // With MilkDrop showing, a skin's Next moves through presets.
-                #[cfg(feature = "milkdrop")]
+                #[cfg(milkdrop)]
                 if self
                     .milkdrop_pane
                     .as_ref()
@@ -5300,7 +5300,7 @@ impl App {
                 {
                     return;
                 }
-                #[cfg(not(feature = "milkdrop"))]
+                #[cfg(not(milkdrop))]
                 let _ = by;
                 self.actions.push(Action::CycleVisualiser);
             }
@@ -13968,17 +13968,17 @@ impl App {
             Action::ToggleWinampMilkdrop => {
                 self.settings.milkdrop_open = !self.settings.milkdrop_open;
                 self.settings_dirty = true;
-                #[cfg(feature = "milkdrop")]
+                #[cfg(milkdrop)]
                 if self.settings.milkdrop_open {
                     self.fetch_presets_if_none(ctx);
                 }
             }
             Action::MilkdropEffect(by) => {
-                #[cfg(feature = "milkdrop")]
+                #[cfg(milkdrop)]
                 if let Some(stream) = &self.milkdrop_pane {
                     stream.step(by);
                 }
-                #[cfg(not(feature = "milkdrop"))]
+                #[cfg(not(milkdrop))]
                 let _ = by;
             }
             Action::MilkdropFullscreen => {
@@ -14004,7 +14004,7 @@ impl App {
                         controls_until: 0.0,
                     });
                     self.milkdrop_backdrop = true;
-                    #[cfg(feature = "milkdrop")]
+                    #[cfg(milkdrop)]
                     self.fetch_presets_if_none(ctx);
                 }
             }
@@ -14383,7 +14383,7 @@ impl App {
         self.note_listening();
         // MilkDrop runs in a child process and can outlive the main window.
         // Poll it before applying actions because its keys produce actions.
-        #[cfg(feature = "milkdrop")]
+        #[cfg(milkdrop)]
         {
             self.sync_milkdrop(ctx);
             self.sync_milkdrop_pane();
@@ -26617,7 +26617,7 @@ mod tests {
 
     /// One child at a time: the plain window waits out the backdrop, and its
     /// being open is not forgotten.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_plain_milkdrop_window_steps_aside_for_the_backdrop() {
         let ctx = egui::Context::default();
@@ -26699,7 +26699,7 @@ mod tests {
     }
 
     /// MilkDrop playback keys produce the same actions as the main window.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_milkdrop_window_drives_playback() {
         let mut app = headless_app();
@@ -26749,7 +26749,7 @@ mod tests {
 
     /// The first reported screen rate sets the default FPS, but later reports
     /// do not override a configured value.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_frame_rate_matches_the_screen_the_first_time_it_is_known() {
         let mut app = headless_app();

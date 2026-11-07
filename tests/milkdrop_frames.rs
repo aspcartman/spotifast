@@ -1,7 +1,7 @@
 //! The windowless MilkDrop child, end to end: it draws on a graphics device
 //! with no display server and publishes frames the app can take. The child is
 //! this package's binary, as the app starts it.
-#![cfg(all(feature = "milkdrop", target_os = "linux"))]
+#![cfg(all(milkdrop, target_os = "linux"))]
 
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};

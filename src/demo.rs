@@ -5117,7 +5117,7 @@ mod tests {
     }
 
     /// A frame at this input time, with what egui hands back.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn timed(
         ctx: &egui::Context,
         app: &mut App,
@@ -5128,7 +5128,7 @@ mod tests {
         text
     }
 
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn timed_output(
         ctx: &egui::Context,
         app: &mut App,
@@ -5157,7 +5157,7 @@ mod tests {
         (text, output.platform_output.cursor_icon)
     }
 
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn immersive_app(name: &str) -> (egui::Context, App) {
         use crate::milkdrop::pane::Picture;
         let (ctx, mut app) = accessible_app(name);
@@ -5177,7 +5177,7 @@ mod tests {
 
     /// The cover opens MilkDrop alone; any click brings back just what was
     /// there; the controls come with the mouse and go again.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_cover_opens_milkdrop_alone_and_any_click_comes_back() {
         use egui::PointerButton::Primary;
@@ -5284,7 +5284,7 @@ mod tests {
     }
 
     /// With no MilkDrop, or no art to click, nothing changes.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_cover_changes_nothing_without_milkdrop_or_art() {
         use crate::milkdrop::pane::Picture;
@@ -5318,7 +5318,7 @@ mod tests {
 
     /// A click on nothing in full screen lyrics is the backdrop's switch, and
     /// nothing else that happens there touches it.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn only_a_click_on_nothing_switches_the_lyrics_backdrop() {
         use egui::PointerButton::Primary;
@@ -5409,7 +5409,7 @@ mod tests {
         assert!(!app.settings.lyrics_milkdrop);
     }
 
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     fn frame_clicks_close_together(ctx: &egui::Context, app: &mut App, at: egui::Pos2) {
         let start = ctx.input(|input| input.time) + 2.0;
         for step in 0..4 {
@@ -8478,7 +8478,7 @@ mod tests {
     /// The frame rate is a dial with detents: it stops at the rates
     /// worth having, names the one it is on, and moving it one notch
     /// lands on the next of them rather than somewhere in between.
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     #[test]
     fn the_frame_rate_dial_steps_between_its_stops() {
         let root =

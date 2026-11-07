@@ -43,6 +43,10 @@ These instructions add implementation constraints for coding agents.
 - egui is stock 0.37 from crates.io; winit still comes from crmne/winit
   apps-0.30. fastframe comes from aspcartman/fastframe, pinned by rev; move
   all its crates together.
+- The UI draws with wgpu only; macOS builds carry no OpenGL. MilkDrop
+  (OpenGL, libprojectM) compiles under `cfg(milkdrop)`, which build.rs sets
+  for the `milkdrop` feature off macOS. Gate MilkDrop code with
+  `#[cfg(milkdrop)]`, never `feature = "milkdrop"`.
 - Stock egui has no bidi shaping, so `crate::bidi::reorder` is a no-op: RTL
   text aligns and wraps from the right but mixed runs stay in logical order.
   Pass logical text to `crate::bidi`; never reorder the string before layout.

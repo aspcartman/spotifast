@@ -68,7 +68,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
         fastframe_titlebar::resize(ui);
         return;
     }
-    #[cfg(feature = "milkdrop")]
+    #[cfg(milkdrop)]
     if app.immersive() {
         if lyrics::immersive(app, ui) {
             player_bar::show(app, ui);

@@ -180,7 +180,7 @@ fn drive(args: Args, mut pump: Pump) -> i32 {
 /// The OpenGL context and what keeps it alive.
 #[cfg(target_os = "linux")]
 struct DeviceContext {
-    gl: Arc<eframe::glow::Context>,
+    gl: Arc<glow::Context>,
     _context: glutin::api::egl::context::PossiblyCurrentContext,
 }
 
@@ -227,7 +227,7 @@ fn on_device(device: &glutin::api::egl::device::Device) -> Result<DeviceContext,
         .map_err(|error| error.to_string())?;
     // SAFETY: the context is current on this thread.
     let gl = Arc::new(unsafe {
-        eframe::glow::Context::from_loader_function_cstr(|symbol| display.get_proc_address(symbol))
+        glow::Context::from_loader_function_cstr(|symbol| display.get_proc_address(symbol))
     });
     Ok(DeviceContext {
         gl,

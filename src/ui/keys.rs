@@ -158,7 +158,7 @@ pub fn handle(app: &mut App, ctx: &egui::Context) {
                     Action::SetLyricsFullscreen(app.lyrics_fullscreen.is_none())
                 },
             );
-            #[cfg(feature = "milkdrop")]
+            #[cfg(milkdrop)]
             if app.lyrics_fullscreen.is_some() {
                 key(Modifiers::NONE, Key::V, Action::ToggleLyricsMilkdrop);
                 if app.milkdrop_behind_lyrics() {
@@ -304,12 +304,12 @@ pub fn shortcuts(locale: Locale) -> Vec<(Cow<'static, str>, Cow<'static, str>)> 
         (keys("Q"), gettext(locale, "Show the queue")),
         (keys("L"), gettext(locale, "Show the lyrics")),
         (keys("F"), gettext(locale, "Full screen lyrics")),
-        #[cfg(feature = "milkdrop")]
+        #[cfg(milkdrop)]
         (
             keys("V"),
             gettext(locale, "Full screen lyrics: MilkDrop behind the words"),
         ),
-        #[cfg(feature = "milkdrop")]
+        #[cfg(milkdrop)]
         (
             keys("N  /  P"),
             gettext(locale, "Full screen lyrics: next or previous preset"),

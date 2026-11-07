@@ -43,6 +43,14 @@ fn glew_library(lib: &std::path::Path) -> Option<&'static str> {
 }
 
 fn main() {
+    // MilkDrop is OpenGL (libprojectM); macOS draws with wgpu only, so the
+    // code compiles under `cfg(milkdrop)`: the feature on, and not macOS.
+    println!("cargo::rustc-check-cfg=cfg(milkdrop)");
+    if std::env::var_os("CARGO_FEATURE_MILKDROP").is_some()
+        && std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("macos")
+    {
+        println!("cargo:rustc-cfg=milkdrop");
+    }
     #[cfg(feature = "soloist-native-audio")]
     native_soloist_audio();
     fastframe_i18n::build::compile_catalogs("assets/i18n");
