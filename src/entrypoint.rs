@@ -579,6 +579,7 @@ pub(crate) fn run() -> eframe::Result<()> {
         path,
         due: std::time::Instant::now() + std::time::Duration::from_millis(cli.demo_shot_delay),
         asked: false,
+        image: Default::default(),
     });
     #[cfg(feature = "demo")]
     let demo_drag = cli
@@ -1490,6 +1491,8 @@ struct Shot {
     path: std::path::PathBuf,
     due: std::time::Instant,
     asked: bool,
+    /// Where the screenshot callback drops the picture.
+    image: std::sync::Arc<std::sync::Mutex<Option<std::sync::Arc<egui::ColorImage>>>>,
 }
 
 #[cfg(feature = "demo")]
@@ -1504,16 +1507,17 @@ impl Shell {
         ctx.request_repaint();
 
         if !shot.asked && std::time::Instant::now() >= shot.due {
-            ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));
+            // egui 0.37 hands the picture to a callback; park it in the shot's slot.
+            let slot = std::sync::Arc::clone(&shot.image);
+            ctx.request_screenshot(move |image| {
+                if let Ok(mut held) = slot.lock() {
+                    *held = Some(image);
+                }
+            });
             shot.asked = true;
         }
 
-        let image = ctx.input(|input| {
-            input.events.iter().find_map(|event| match event {
-                egui::Event::Screenshot { image, .. } => Some(image.clone()),
-                _ => None,
-            })
-        });
+        let image = shot.image.lock().ok().and_then(|mut held| held.take());
         let Some(image) = image else {
             return;
         };
