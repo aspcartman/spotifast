@@ -29,8 +29,10 @@ pub const CONFIG: UpdateConfig = UpdateConfig {
     // checksums.txt lists them (#737): an AppImage replaces itself with the
     // next one.
     appimage: true,
+    // The personal fork: it publishes no releases, so the updater never
+    // swaps this build for upstream's. Updates come from merging upstream.
     ..UpdateConfig::new(
-        "crmne/spotifast",
+        "aspcartman/spotifast",
         "Spotifast",
         "spotifast",
         env!("CARGO_PKG_VERSION"),
