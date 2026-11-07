@@ -617,6 +617,11 @@ pub struct WideAnalyser {
     held: [f32; WIDE_BANDS],
     speed: [f32; WIDE_BANDS],
     last: Option<Instant>,
+    /// Sensitivity: every band's height times this before it is clipped.
+    pub gain: f32,
+    /// Treble boost in dB per octave, rising from the lowest band, so the
+    /// quieter highs move as much as the bass does.
+    pub tilt: f32,
 }
 
 impl Default for WideAnalyser {
@@ -630,6 +635,8 @@ impl Default for WideAnalyser {
             held: [0.0; WIDE_BANDS],
             speed: [0.0; WIDE_BANDS],
             last: None,
+            gain: 1.0,
+            tilt: 0.0,
         }
     }
 }
@@ -651,8 +658,10 @@ impl WideAnalyser {
         }
         self.fft.spectrum(&self.wave, &mut self.spectrum);
         let columns = bands(&self.spectrum);
-        for (level, column) in self.levels.iter_mut().zip(columns) {
-            let target = column.min(MAX_HEIGHT) / MAX_HEIGHT;
+        for (band, (level, column)) in self.levels.iter_mut().zip(columns).enumerate() {
+            // Columns are a semitone apart: twelve to the octave.
+            let boost = 10f32.powf(self.tilt * band as f32 / 12.0 / 20.0);
+            let target = (column * self.gain * boost).min(MAX_HEIGHT) / MAX_HEIGHT;
             *level = (*level - WIDE_FALL * elapsed).max(target);
             // Too low to see: at rest.
             if *level < 0.01 {
@@ -690,6 +699,19 @@ impl WideAnalyser {
             .chain(&self.peaks)
             .all(|level| *level == 0.0)
     }
+}
+
+/// `values` folded into `bars` bars, each the loudest of the bands it
+/// covers, so fewer, wider bars still show every band's punch.
+pub fn group(values: &[f32], bars: usize) -> Vec<f32> {
+    let bars = bars.clamp(1, values.len().max(1));
+    (0..bars)
+        .map(|bar| {
+            let start = bar * values.len() / bars;
+            let end = ((bar + 1) * values.len() / bars).max(start + 1);
+            values[start..end].iter().copied().fold(0.0, f32::max)
+        })
+        .collect()
 }
 
 /// The player bar's waveform: Winamp's scope, every seventh sample with

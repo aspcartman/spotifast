@@ -1242,6 +1242,9 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let player_bar_vis = gettext(locale, "Player bar visualizer");
     let player_bar_vis_click = gettext(locale, "Click player bar to change visualizer");
     let player_bar_peaks = gettext(locale, "Spectrum peak caps");
+    let player_bar_bars = gettext(locale, "Spectrum bars");
+    let player_bar_gain = gettext(locale, "Spectrum sensitivity");
+    let player_bar_tilt = gettext(locale, "Spectrum treble boost");
     // Follow system's own light and dark palettes. Omarchy's palette already
     // follows the desktop, so they are offered only without it.
     let show_pair = app.settings.custom_theme.is_none()
@@ -1364,8 +1367,23 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 "Hang a small line at each band's recent peak, which then falls slowly.",
             ),
         ),
+        RowText::new(
+            player_bar_bars.clone(),
+            gettext(locale, "How many bars the player bar's spectrum draws."),
+        ),
+        RowText::new(
+            player_bar_gain.clone(),
+            gettext(locale, "How tall the bars grow for the same sound."),
+        ),
+        RowText::new(
+            player_bar_tilt.clone(),
+            gettext(
+                locale,
+                "Lift the higher bands, which carry less energy than the bass, in dB per octave.",
+            ),
+        ),
     ];
-    for index in [8, 9, 10, 13] {
+    for index in [8, 9, 10, 13, 14, 15, 16] {
         appearance_rows[index].available &= visualizers;
     }
     if section_matches(&needle, &appearance, &appearance_rows) {
@@ -1590,6 +1608,69 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                         &palette,
                         &player_bar_peaks,
                         &mut app.settings.player_bar_peaks,
+                    )
+                    .changed()
+                    {
+                        changed = true;
+                    }
+                },
+            );
+            filtered_row(
+                ui,
+                &palette,
+                &needle,
+                &appearance,
+                &appearance_rows[14],
+                |ui| {
+                    if setting_slider(
+                        ui,
+                        &palette,
+                        &mut app.settings.player_bar_bars,
+                        8..=crate::vis::WIDE_BANDS as u32,
+                        |slider| slider,
+                        |value| value,
+                    )
+                    .changed()
+                    {
+                        changed = true;
+                    }
+                },
+            );
+            filtered_row(
+                ui,
+                &palette,
+                &needle,
+                &appearance,
+                &appearance_rows[15],
+                |ui| {
+                    if setting_slider(
+                        ui,
+                        &palette,
+                        &mut app.settings.player_bar_gain,
+                        0.25..=4.0,
+                        |slider| slider.logarithmic(true),
+                        |value| value.speed(0.01).max_decimals(2).suffix("×"),
+                    )
+                    .changed()
+                    {
+                        changed = true;
+                    }
+                },
+            );
+            filtered_row(
+                ui,
+                &palette,
+                &needle,
+                &appearance,
+                &appearance_rows[16],
+                |ui| {
+                    if setting_slider(
+                        ui,
+                        &palette,
+                        &mut app.settings.player_bar_tilt,
+                        0.0..=9.0,
+                        |slider| slider.step_by(0.5),
+                        |value| value.speed(0.05).max_decimals(1).suffix(" dB/oct"),
                     )
                     .changed()
                     {
