@@ -1795,19 +1795,22 @@ fn track_row_contents(
                 if track.explicit {
                     explicit_badge(&mut child, &palette);
                 }
-                theme::text(
-                    &mut child,
-                    "•",
-                    theme::regular(12.0),
-                    palette.secondary.gamma_multiply(0.6),
-                );
-                artist_links(
-                    &mut child,
-                    app,
-                    &track.artists,
-                    theme::regular(13.0),
-                    subtitle_color,
-                );
+                // The Artist column, when shown, replaces the inline artists.
+                if cols.artist == 0.0 {
+                    theme::text(
+                        &mut child,
+                        "•",
+                        theme::regular(12.0),
+                        palette.secondary.gamma_multiply(0.6),
+                    );
+                    artist_links(
+                        &mut child,
+                        app,
+                        &track.artists,
+                        theme::regular(13.0),
+                        subtitle_color,
+                    );
+                }
                 if let Some(added) = row.added_at.filter(|a| !a.starts_with("1970-01-01"))
                     && cols.added == 0.0
                 {

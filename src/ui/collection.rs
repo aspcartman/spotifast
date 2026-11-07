@@ -818,8 +818,8 @@ fn table_contents(app: &mut App, ui: &mut egui::Ui, table: Table<'_>) {
     );
     let thin = app.settings.tracklist_compact;
     let show_cover = !thin && table.show_cover;
-    let show_artist = !thin
-        && table
+    // Compact rows show the column too; the row drops its inline artists.
+    let show_artist = table
             .items
             .iter()
             .any(|(item, _, _)| matches!(item, PlayableItem::Track(_)));
