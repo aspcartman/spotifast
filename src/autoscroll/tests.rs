@@ -168,7 +168,7 @@ impl Fixture {
             .map(|(id, _)| {
                 egui::scroll_area::State::load(&self.ctx, *id)
                     .unwrap()
-                    .offset
+                    .clamped_offset()
             })
             .collect()
     }
@@ -304,6 +304,7 @@ fn escape_clicks_and_wheel_stop_the_gesture_without_immediately_rearming_it() {
                 unit: egui::MouseWheelUnit::Point,
                 delta: egui::vec2(0.0, -20.0),
                 phase: egui::TouchPhase::Move,
+                source: egui::MouseWheelSource::Unknown,
                 modifiers: egui::Modifiers::NONE,
             },
         };
@@ -385,7 +386,7 @@ fn a_nested_horizontal_shelf_keeps_its_axis_and_never_scrolls_the_outer_page() {
             },
         );
         output.textures_delta.clear();
-        let offsets = ids.map(|id| egui::scroll_area::State::load(&ctx, id).unwrap().offset);
+        let offsets = ids.map(|id| egui::scroll_area::State::load(&ctx, id).unwrap().clamped_offset());
         (first, controller.active(), offsets)
     };
     render(vec![]);
