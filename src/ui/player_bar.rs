@@ -144,7 +144,12 @@ fn visualizer(app: &mut App, ui: &egui::Ui, rect: Rect, now: Option<&NowPlaying>
             let samples = if sounding {
                 app.winamp
                     .tap
-                    .window(vis::WIDE_SAMPLES, app.visualizer_lag())
+                    // Centre the FFT window on what the speaker plays now,
+                    // not half a window (23 ms) behind it.
+                    .window(
+                        vis::WIDE_SAMPLES,
+                        app.visualizer_lag().saturating_sub(vis::WIDE_SAMPLES / 2),
+                    )
             } else {
                 Vec::new()
             };
