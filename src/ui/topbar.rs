@@ -211,7 +211,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     }
     // Where the titlebar used to be: the bar grows upwards into that space and
     // its empty parts drag the window.
-    let inset = theme::titlebar_inset(ui.ctx());
+    let inset = theme::top_bar_inset(ui.ctx(), app.settings.sidebar_visible);
     let content_height = theme::top_bar_height() + inset;
     if fastframe_titlebar::enabled() {
         fastframe_titlebar::drag(

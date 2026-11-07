@@ -1236,6 +1236,7 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let accent_from_art = gettext(locale, "Colour from album art");
     let sidebar_compact = gettext(locale, "Compact library sidebar");
     let tracklist_compact = gettext(locale, "Compact track list");
+    let compact_top_bar = gettext(locale, "Compact top bar");
     let middle_click = gettext(locale, "Middle-click autoscroll");
     let custom_titlebar = gettext(locale, "Custom title bar");
     let show_custom_titlebar = cfg!(target_os = "linux") || app.windows_controls_visible();
@@ -1381,6 +1382,10 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 locale,
                 "Lift the higher bands, which carry less energy than the bass, in dB per octave.",
             ),
+        ),
+        RowText::new(
+            compact_top_bar.clone(),
+            gettext(locale, "Make the bar above the page shorter."),
         ),
     ];
     for index in [8, 9, 10, 13, 14, 15, 16] {
@@ -1728,6 +1733,25 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                         &palette,
                         &tracklist_compact,
                         &mut app.settings.tracklist_compact,
+                    )
+                    .changed()
+                    {
+                        changed = true;
+                    }
+                },
+            );
+            filtered_row(
+                ui,
+                &palette,
+                &needle,
+                &appearance,
+                &appearance_rows[17],
+                |ui| {
+                    if widgets::switch(
+                        ui,
+                        &palette,
+                        &compact_top_bar,
+                        &mut app.settings.compact_top_bar,
                     )
                     .changed()
                     {

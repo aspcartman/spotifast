@@ -39,6 +39,7 @@ use crate::theme::{self, Icon};
 pub fn show(app: &mut App, ui: &mut egui::Ui) {
     let ctx = ui.ctx().clone();
     let ctx = &ctx;
+    theme::set_compact_top_bar(app.settings.compact_top_bar);
     keys::handle(app, ctx);
     for path in winamp::dropped_skins(ctx) {
         app.actions.push(Action::InstallSkin(path));
@@ -86,7 +87,8 @@ pub fn show(app: &mut App, ui: &mut egui::Ui) {
                 ui.max_rect().min,
                 vec2(
                     ui.max_rect().width(),
-                    theme::top_bar_height() + theme::titlebar_inset(ui.ctx()),
+                    theme::top_bar_height()
+                        + theme::top_bar_inset(ui.ctx(), app.settings.sidebar_visible),
                 ),
             ),
         );

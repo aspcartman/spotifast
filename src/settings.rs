@@ -344,6 +344,9 @@ pub struct Settings {
     pub queue_width: f32,
     /// Use compact single-line rows without cover art in track lists.
     pub tracklist_compact: bool,
+    /// A shorter top bar that, beside the sidebar, no longer leaves room
+    /// for the traffic lights it does not sit under.
+    pub compact_top_bar: bool,
     /// Linux: middle-click a list to autoscroll it. Off by default, because
     /// Linux desktops usually paste the primary selection on middle click.
     /// Windows always autoscrolls and macOS never does.
@@ -533,6 +536,7 @@ impl Default for Settings {
             lyrics_width: 360.0,
             queue_width: 360.0,
             tracklist_compact: false,
+            compact_top_bar: false,
             middle_click_autoscroll: false,
             search_history: Vec::new(),
             show_shortcut_hints: true,

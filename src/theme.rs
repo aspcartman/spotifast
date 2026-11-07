@@ -244,11 +244,33 @@ pub const PLAYER_BAR_HEIGHT: f32 = 88.0;
 pub const SIDE_PANEL_MIN_WIDTH: f32 = 280.0;
 pub const TOP_BAR_HEIGHT: f32 = 56.0;
 pub const CUSTOM_TOP_BAR_HEIGHT: f32 = 48.0;
+/// The compact top bar's height: its 32 point controls and a little air.
+pub const COMPACT_TOP_BAR_HEIGHT: f32 = 40.0;
+
+/// Whether the top bar is compact, set from the settings each frame so the
+/// layout helpers below can read it without the app.
+static COMPACT_TOP_BAR: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+pub fn set_compact_top_bar(on: bool) {
+    COMPACT_TOP_BAR.store(on, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// The space above the top bar's controls: the traffic lights' room, except
+/// in a compact bar beside the sidebar, whose top the traffic lights sit on.
+pub fn top_bar_inset(ctx: &egui::Context, sidebar_visible: bool) -> f32 {
+    if COMPACT_TOP_BAR.load(std::sync::atomic::Ordering::Relaxed) && sidebar_visible {
+        0.0
+    } else {
+        titlebar_inset(ctx)
+    }
+}
 
 /// Keep the custom Windows header close to its 36-point caption controls.
 /// Linux's custom title bar keeps the ordinary height.
 pub fn top_bar_height() -> f32 {
-    if cfg!(windows) && fastframe_titlebar::enabled() {
+    if COMPACT_TOP_BAR.load(std::sync::atomic::Ordering::Relaxed) {
+        COMPACT_TOP_BAR_HEIGHT
+    } else if cfg!(windows) && fastframe_titlebar::enabled() {
         CUSTOM_TOP_BAR_HEIGHT
     } else {
         TOP_BAR_HEIGHT
