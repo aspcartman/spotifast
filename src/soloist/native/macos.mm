@@ -51,7 +51,21 @@ struct API_AVAILABLE(macos(14.2)) Route {
     std::atomic<bool> audible{false}, overflow{false}, resetOutput{false};
     std::atomic<OSStatus> error{noErr};
     bool muted = false;
+    // The CoreAudio UID of Spotifast's chosen output, or nil for the default.
+    NSString *chosen = nil;
     Route(void *ctx, Control ctl) : context(ctx), control(ctl) {}
+    // Where the processed audio plays: the chosen device while it exists,
+    // otherwise the system default, as built-in playback does.
+    AudioObjectID target() {
+        if (chosen) {
+            CFStringRef uid = (__bridge CFStringRef)chosen;
+            AudioObjectID found = 0; UInt32 size = sizeof found;
+            auto address = property(kAudioHardwarePropertyTranslateUIDToDevice);
+            if (!AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, sizeof uid, &uid, &size, &found) && found)
+                return found;
+        }
+        return get<AudioObjectID>(kAudioObjectSystemObject, kAudioHardwarePropertyDefaultOutputDevice);
+    }
     ~Route() {
         audible.store(false);
         if (queue) { AudioQueueStop(queue, true); AudioQueueDispose(queue, true); }
@@ -102,7 +116,7 @@ struct API_AVAILABLE(macos(14.2)) Route {
             || format.mBitsPerChannel != 32 || format.mChannelsPerFrame != 2
             || format.mSampleRate < 8000 || format.mSampleRate > 192000)
             throw static_cast<OSStatus>(kAudioHardwareUnsupportedOperationError);
-        output = get<AudioObjectID>(kAudioObjectSystemObject, kAudioHardwarePropertyDefaultOutputDevice);
+        output = target();
         NSDictionary *aggregate = @{@kAudioAggregateDeviceNameKey:@"Spotifast Soloist (private)",
             @kAudioAggregateDeviceUIDKey:NSUUID.UUID.UUIDString, @kAudioAggregateDeviceIsPrivateKey:@YES,
             @kAudioAggregateDeviceTapAutoStartKey:@YES,
@@ -111,9 +125,13 @@ struct API_AVAILABLE(macos(14.2)) Route {
         check(AudioHardwareCreateAggregateDevice((__bridge CFDictionaryRef)aggregate, &device));
         check(AudioDeviceCreateIOProcID(device, capture, this, &io));
         check(AudioDeviceStart(device, io));
-        // Prepare a silent output before muting Soloist. The queue follows the
-        // default device; a change restarts the route to renegotiate its format.
+        // Prepare a silent output before muting Soloist. The queue plays on
+        // `output`; a change of it restarts the route to renegotiate its format.
         check(AudioQueueNewOutput(&format, render, this, nullptr, nullptr, 0, &queue));
+        if (output != get<AudioObjectID>(kAudioObjectSystemObject, kAudioHardwarePropertyDefaultOutputDevice)) {
+            CFStringRef uid = (__bridge CFStringRef)chosen;
+            check(AudioQueueSetProperty(queue, kAudioQueueProperty_CurrentDevice, &uid, sizeof uid));
+        }
         check(AudioQueueSetParameter(queue, kAudioQueueParam_Volume, 1));
         const UInt32 bytes = static_cast<UInt32>(format.mSampleRate / 100) * 8;
         for (int i = 0; i < 3; ++i) {
@@ -144,7 +162,7 @@ struct API_AVAILABLE(macos(14.2)) Route {
             if (now >= nextCheck) {
                 nextCheck = now + std::chrono::milliseconds(500);
                 auto current = get<AudioStreamBasicDescription>(tap, kAudioTapPropertyFormat);
-                if (output != get<AudioObjectID>(kAudioObjectSystemObject, kAudioHardwarePropertyDefaultOutputDevice)
+                if (output != target()
                     || current.mSampleRate != format.mSampleRate || current.mFormatFlags != format.mFormatFlags
                     || current.mChannelsPerFrame != format.mChannelsPerFrame)
                     throw static_cast<OSStatus>(kAudioHardwareBadDeviceError);
@@ -165,9 +183,10 @@ struct API_AVAILABLE(macos(14.2)) Route {
         }
     }
 };
-int run(uint32_t pid, void *context, Control control, Process process, Event event) API_AVAILABLE(macos(14.2));
-int run(uint32_t pid, void *context, Control control, Process process, Event event) {
+int run(uint32_t pid, const char *device, void *context, Control control, Process process, Event event) API_AVAILABLE(macos(14.2));
+int run(uint32_t pid, const char *device, void *context, Control control, Process process, Event event) {
     Route route(context, control);
+    if (device && *device) route.chosen = [NSString stringWithUTF8String:device];
     try {
         while (!(control(context) & 1) && !route.open(static_cast<pid_t>(pid)))
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -184,9 +203,10 @@ int run(uint32_t pid, void *context, Control control, Process process, Event eve
     }
 }
 }
-extern "C" int spotifast_soloist_audio(uint32_t pid, void *context, Control control, Process process, Event event) {
+// `device` is the CoreAudio UID Spotifast's output setting saved, or null.
+extern "C" int spotifast_soloist_audio_on(uint32_t pid, const char *device, void *context, Control control, Process process, Event event) {
     @autoreleasepool {
-        if (@available(macOS 14.2, *)) return run(pid, context, control, process, event);
+        if (@available(macOS 14.2, *)) return run(pid, device, context, control, process, event);
         return static_cast<int>(kAudioHardwareUnsupportedOperationError);
     }
 }

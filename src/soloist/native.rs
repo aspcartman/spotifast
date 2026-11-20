@@ -110,8 +110,20 @@ mod adapter {
     // The native function borrows Context until it returns. Only its worker
     // calls process/event, sequentially; real-time callbacks only call control.
     unsafe extern "C" {
+        #[cfg(target_os = "windows")]
         fn spotifast_soloist_audio(
             pid: u32,
+            context: *mut c_void,
+            control: extern "C" fn(*mut c_void) -> u32,
+            process: extern "C" fn(*mut c_void, *mut f32, usize, u32),
+            event: extern "C" fn(*mut c_void, u32),
+        ) -> i32;
+        // macOS also takes the output setting's CoreAudio UID (or null), so
+        // the processed audio plays where built-in playback would.
+        #[cfg(target_os = "macos")]
+        fn spotifast_soloist_audio_on(
+            pid: u32,
+            device: *const std::ffi::c_char,
             context: *mut c_void,
             control: extern "C" fn(*mut c_void) -> u32,
             process: extern "C" fn(*mut c_void, *mut f32, usize, u32),
@@ -178,6 +190,12 @@ mod adapter {
         let _ = output_volume;
         let state = Arc::new(state);
         let worker = state.clone();
+        // A name that is not a UID (or has a NUL) finds no device: the default.
+        #[cfg(target_os = "macos")]
+        let device = config
+            .audio_device
+            .as_deref()
+            .and_then(|device| std::ffi::CString::new(device).ok());
         std::thread::Builder::new().name("soloist-native-audio".into()).spawn(move || {
             while worker.child.load(Ordering::Acquire) == 0 && !worker.stop.load(Ordering::Acquire) {
                 std::thread::sleep(Duration::from_millis(20));
@@ -188,7 +206,12 @@ mod adapter {
                 state: worker.clone(),
             };
             // SAFETY: Context stays alive until every native callback ends.
+            #[cfg(target_os = "windows")]
             let status = unsafe { spotifast_soloist_audio(worker.child.load(Ordering::Acquire),
+                (&mut context as *mut Context).cast(), control, process, event) };
+            #[cfg(target_os = "macos")]
+            let status = unsafe { spotifast_soloist_audio_on(worker.child.load(Ordering::Acquire),
+                device.as_ref().map_or(std::ptr::null(), |device| device.as_ptr()),
                 (&mut context as *mut Context).cast(), control, process, event) };
             worker.routed.store(false, Ordering::Release);
             // Errors before the Mac source is muted, and all Windows capture
