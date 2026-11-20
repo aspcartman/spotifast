@@ -1,7 +1,7 @@
 [package]
 name = "spotifast"
 default-run = "spotifast"
-version = "0.17.1"
+version = "0.17.2"
 edition = "2024"
 rust-version = "1.98"
 license = "MIT"
@@ -37,63 +37,67 @@ egui_extras = { version = "0.37.0", features = ["image", "svg"] }
 # The shared foundation of Spotifast, ZapFast, RekordFlash and TonePush
 # (crmne/fastframe). Every crate comes from the same revision; move them
 # together. Dock icons and badges share the same foundation as the tray.
-fastframe-text = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
-fastframe-fonts = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
-fastframe-icons = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
-fastframe-theme = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-text = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
+fastframe-fonts = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
+fastframe-icons = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
+fastframe-theme = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # Colour emoji in the platform's own style (Apple Color Emoji, Segoe UI
 # Emoji, the desktop's colour emoji font), in every text through its egui
 # plugin.
-fastframe-emoji = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-emoji = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # Catalogs compiled from PO files at build time (see build.rs) and the
 # system's preferred languages. No libintl or runtime catalog parsing.
-fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # The log file for bug reports and the panic log (env_logger underneath).
-fastframe-log = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-log = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # The tray item, so closing the window can keep the music playing:
 # StatusNotifier on Linux, the notification area on Windows, the menu bar
 # on macOS.
-fastframe-tray = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-tray = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # Keeps the app running without a window around eframe::run_native.
-fastframe-shell = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-shell = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # Opens the window, and says in a native dialog why when the computer has no
 # usable GPU. aspcartman/fastframe's wgpu branch tries wgpu only.
-fastframe-graphics = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-graphics = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # The title bar the app draws itself: the header drag and double-click on
 # every platform, and on Windows and Linux the caption buttons and resizable
 # edges when the listener turns the platform's frame off.
-fastframe-titlebar = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-titlebar = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # Self-update from GitHub releases, on the reqwest client below.
-fastframe-update = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c", features = ["reqwest"] }
+fastframe-update = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7", features = ["reqwest"] }
 # Settings, the session, the history, caches and the credential markers
 # are replaced whole: a temporary file beside each, synced to the disk, then
 # moved over it (written through on Windows), so a crash never leaves half.
-fastframe-file = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-file = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # The device's power, session and network state: energy saver, battery,
 # display, lock, the internet's reach and cost, sleep and wake, and the App
 # Nap activity local playback holds on macOS.
-fastframe-power = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-power = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # The audio device stream, and the only audio output on every platform: it
 # pauses, so a paused player costs no CPU (#636), follows the default output
 # and reopens after a failure. On Linux it plays through cpal's default host:
 # PipeWire, then PulseAudio, then ALSA. librespot's own backends (rodio,
 # PulseAudio) are left out.
-fastframe-audio = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-audio = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # The wheel step, the Linux touchpad scale and glide, and the axis a scroll
 # gesture holds.
-fastframe-scroll = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-scroll = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # Starting at login, with the window or in the tray (#122).
-fastframe-autostart = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-autostart = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # One running copy per user: a lock and a private channel that a second
 # launch and the command line hand their requests to.
-fastframe-instance = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-instance = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # The config, state and cache folders: the per-user ones, or for a copy from
 # the portable Windows zip, spotifast-data next to the executable (#703).
-fastframe-dirs = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-dirs = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
+# The Downloads folder an update notice names (fastframe-dirs already builds
+# it). Tests also pin that installed copies keep the folders they had before
+# fastframe-dirs.
+directories = "6"
 # The desktop's media controls: MPRIS on Linux, the media overlay on
 # Windows, Now Playing on macOS. The media keys and those panels send
 # commands back, and closing the window keeps the music playing.
-fastframe-now-playing = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-now-playing = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 # Reading installed fonts for MilkDrop's overlays, the Winamp playlist's
 # pixel text, and the playlist face. skrifa is the parser epaint already
 # rasterizes with, and the version has to track epaint's or the binary
@@ -101,6 +105,12 @@ fastframe-now-playing = { git = "https://github.com/aspcartman/fastframe", rev =
 # to the few pages of each font that name it. fastframe-fonts uses both.
 skrifa = "0.44"
 memmap2 = "0.9"
+# Shaping for that pixel text (src/ui/winamp/pixel_text.rs): joining Arabic
+# letters and forming their ligatures before the line is rasterized. It is
+# the shaper epaint draws with, at the version epaint is built against, so
+# the playlist joins letters the way every other view does. Already compiled
+# for epaint and fastframe-emoji, so it adds no code to the build.
+harfrust = "0.12"
 # bmp is for Winamp skins, whose bitmaps are BMP files; gif is for Windows
 # Media Player skins, which are often drawn as GIFs. webp is for cover
 # URLs: Spotify's CDN sometimes serves the same cover as WebP, and without
@@ -151,8 +161,10 @@ hyper-util = { version = "0.1", default-features = false, features = ["client-pr
 http = "1"
 # `fs` is used by the playlist cache in `backend.rs`. On Linux the MPRIS
 # dependency happens to turn it on, which is why leaving it out built
-# there and nowhere else. `net` is the local HTTP-proxy tests.
-tokio = { version = "1", features = ["rt-multi-thread", "sync", "time", "macros", "fs", "net", "io-util", "process"] }
+# there and nowhere else. `net` is the local HTTP-proxy tests. `signal`
+# turns a polite SIGTERM, SIGINT or SIGHUP into a normal quit
+# (src/terminate.rs); `process` already builds its signal-hook-registry.
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "time", "macros", "fs", "net", "io-util", "process", "signal"] }
 # Soloist's loopback control API. Both already arrive through librespot.
 tokio-tungstenite = "0.28"
 futures-util = { version = "0.3", features = ["sink"] }
@@ -213,7 +225,7 @@ glutin-winit = { version = "0.5", optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 # The packaged Dock artwork also identifies unbundled Cargo runs.
-fastframe-dock = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c" }
+fastframe-dock = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7" }
 apple-native-keyring-store = { version = "1.0.2", features = ["keychain"] }
 # The application menus and Dock menu (src/mac_menu.rs). "exception" lets
 # src/mac_touchbar_crash_guard.rs catch a specific AppKit Objective-C
@@ -231,8 +243,9 @@ objc2-foundation = { version = "0.3", default-features = false, features = ["std
 [target.'cfg(windows)'.dependencies]
 windows-native-keyring-store = { version = "1.1", default-features = false }
 # Message loops, the taskbar thumbnail buttons and window styles, and DPAPI
-# for the sealed copies of the grants (src/credentials.rs).
-windows-sys = { version = "0.60", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Gdi", "Win32_Security_Cryptography", "Win32_System_Com", "Win32_System_LibraryLoader", "Win32_System_Registry", "Win32_System_Threading", "Win32_UI_Accessibility", "Win32_UI_HiDpi", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
+# for the sealed copies of the grants (src/credentials.rs). The job object
+# ends the Soloist child with Spotifast however it exits (src/soloist/owned.rs).
+windows-sys = { version = "0.60", features = ["Win32_Foundation", "Win32_Globalization", "Win32_Graphics_Gdi", "Win32_Security_Cryptography", "Win32_System_Com", "Win32_System_JobObjects", "Win32_System_LibraryLoader", "Win32_System_Registry", "Win32_System_Threading", "Win32_UI_Accessibility", "Win32_UI_HiDpi", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 # Routes only the owned Soloist player through EQ and visualizers. Already
@@ -254,15 +267,13 @@ x11rb = { version = "0.13", default-features = false }
 cc = { version = "1", optional = true }
 # Drops unfinished PO entries and compiles catalog text and gettext plural
 # expressions to Rust. Ordinary builds do not need gettext tools.
-fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "bc7a30ee3e040edc5006967f468efebd36d22d0c", features = ["build"] }
+fastframe-i18n = { git = "https://github.com/aspcartman/fastframe", rev = "77158155adf95c15ca36be36e08c9596be5634e7", features = ["build"] }
 
 [dev-dependencies]
 # Checks that every catalog covers the template and keeps its placeholders.
 polib = "0.3"
 # Run connection-deadline regressions with a virtual clock.
 tokio = { version = "1", features = ["test-util"] }
-# Pins that installed copies keep the folders they had before fastframe-dirs.
-directories = "6"
 
 # The icon and version information Windows shows for the executable.
 [target.'cfg(windows)'.build-dependencies]
@@ -355,10 +366,10 @@ hyper-proxy2 = { git = "https://github.com/crmne/hyper-proxy2", rev = "efca48113
 # prefetched for the next track only (#1846).
 # Every librespot crate comes from the fork so one copy exists. Drop each
 # patch once upstream merges it.
-librespot-audio = { git = "https://github.com/crmne/librespot", rev = "3ba977f1f918582edce566cfc16617f8eccdfb1e" }
-librespot-connect = { git = "https://github.com/crmne/librespot", rev = "3ba977f1f918582edce566cfc16617f8eccdfb1e" }
-librespot-core = { git = "https://github.com/crmne/librespot", rev = "3ba977f1f918582edce566cfc16617f8eccdfb1e" }
-librespot-metadata = { git = "https://github.com/crmne/librespot", rev = "3ba977f1f918582edce566cfc16617f8eccdfb1e" }
-librespot-oauth = { git = "https://github.com/crmne/librespot", rev = "3ba977f1f918582edce566cfc16617f8eccdfb1e" }
-librespot-playback = { git = "https://github.com/crmne/librespot", rev = "3ba977f1f918582edce566cfc16617f8eccdfb1e" }
-librespot-protocol = { git = "https://github.com/crmne/librespot", rev = "3ba977f1f918582edce566cfc16617f8eccdfb1e" }
+librespot-audio = { git = "https://github.com/crmne/librespot", rev = "8ba22cd44168155b490e56aba80875771f27b75c" }
+librespot-connect = { git = "https://github.com/crmne/librespot", rev = "8ba22cd44168155b490e56aba80875771f27b75c" }
+librespot-core = { git = "https://github.com/crmne/librespot", rev = "8ba22cd44168155b490e56aba80875771f27b75c" }
+librespot-metadata = { git = "https://github.com/crmne/librespot", rev = "8ba22cd44168155b490e56aba80875771f27b75c" }
+librespot-oauth = { git = "https://github.com/crmne/librespot", rev = "8ba22cd44168155b490e56aba80875771f27b75c" }
+librespot-playback = { git = "https://github.com/crmne/librespot", rev = "8ba22cd44168155b490e56aba80875771f27b75c" }
+librespot-protocol = { git = "https://github.com/crmne/librespot", rev = "8ba22cd44168155b490e56aba80875771f27b75c" }
